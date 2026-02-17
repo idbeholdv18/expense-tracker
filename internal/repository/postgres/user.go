@@ -5,15 +5,15 @@ import (
 	"github/idbeholdv18/expense-tracker/internal/repository"
 )
 
-type UserRepository struct {
+type PostgresUserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewUserRepository(db *sql.DB) *PostgresUserRepository {
+	return &PostgresUserRepository{db: db}
 }
 
-func (r *UserRepository) FindByEmail(email string) (*repository.User, error) {
+func (r *PostgresUserRepository) FindByEmail(email string) (*repository.User, error) {
 	query := `
 		SELECT id, email, username, password
 		FROM users.users
@@ -35,7 +35,7 @@ func (r *UserRepository) FindByEmail(email string) (*repository.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) FindByUsername(username string) (*repository.User, error) {
+func (r *PostgresUserRepository) FindByUsername(username string) (*repository.User, error) {
 	query := `
 		SELECT id, email, username, password
 		FROM users.users
@@ -56,7 +56,29 @@ func (r *UserRepository) FindByUsername(username string) (*repository.User, erro
 	return user, nil
 }
 
-func (r *UserRepository) Create(user *repository.User) error {
+func (r *PostgresUserRepository) FindByLogin(login string) (*repository.User, error) {
+	query := `
+		SELECT id, email, username, password
+		FROM users.users
+		WHERE email=$1 OR username=$2 LIMIT 1
+	`
+
+	user := &repository.User{}
+
+	err := r.db.QueryRow(query, login, login).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *PostgresUserRepository) Create(user *repository.User) error {
 	query := `
 		INSERT INTO users.users (email, username, password)
 		VALUES($1, $2, $3)

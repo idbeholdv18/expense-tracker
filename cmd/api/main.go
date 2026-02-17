@@ -10,7 +10,7 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
