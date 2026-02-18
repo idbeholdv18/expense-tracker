@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github/idbeholdv18/expense-tracker/internal/auth"
+	"github/idbeholdv18/expense-tracker/internal/expenses"
+	"github/idbeholdv18/expense-tracker/internal/middleware"
 	"github/idbeholdv18/expense-tracker/internal/provider"
 	"github/idbeholdv18/expense-tracker/internal/repository/postgres"
 	"log"
@@ -30,19 +32,31 @@ func main() {
 
 	fmt.Println("Connected to Postgres")
 
-	repo := postgres.NewUserRepository(db)
+	userRepo := postgres.NewUserRepository(db)
+	expensesRepo := postgres.NewExpensesRepository(db)
 
 	authService := auth.AuthService{
-		Repo:   repo,
+		Repo:   userRepo,
 		Secret: []byte("secret"),
 	}
 
-	handler := provider.AuthHandler{
+	expensesService := expenses.ExpenseService{
+		Repo: expensesRepo,
+	}
+
+	authHandler := provider.AuthHandler{
 		Auth: &authService,
 	}
 
-	http.Handle("/login", handler.HandleLogin())
-	http.Handle("/register", handler.HandleRegister())
+	expensesHandler := provider.ExpenseHandler{
+		Service: &expensesService,
+	}
+
+	jwtMiddleware := middleware.JwtMiddleware([]byte("secret"))
+
+	http.Handle("/api/v1/login", authHandler.HandleLogin())
+	http.Handle("/api/v1/register", authHandler.HandleRegister())
+	http.Handle("/api/v1/expenses", jwtMiddleware(expensesHandler.HandleCreate()))
 
 	http.ListenAndServe(fmt.Sprintf("localhost:%d", *port), nil)
 }
