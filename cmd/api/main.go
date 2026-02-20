@@ -56,7 +56,7 @@ func main() {
 
 	http.Handle("/api/v1/login", authHandler.HandleLogin())
 	http.Handle("/api/v1/register", authHandler.HandleRegister())
-	http.Handle("/api/v1/expenses", jwtMiddleware(expensesHandler.HandleCreate()))
+	http.Handle("/api/v1/expenses", jwtMiddleware(expensesHandler.HandleExpense()))
 
 	http.ListenAndServe(fmt.Sprintf("localhost:%d", *port), nil)
 }

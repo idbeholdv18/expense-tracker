@@ -1,6 +1,7 @@
 package expenses
 
 import (
+	"context"
 	"github/idbeholdv18/expense-tracker/internal/dberrors"
 	"github/idbeholdv18/expense-tracker/internal/domain"
 	"github/idbeholdv18/expense-tracker/internal/repository"
@@ -11,10 +12,10 @@ type ExpenseService struct {
 }
 
 func (s *ExpenseService) Create(
+	ctx context.Context,
 	e *repository.Expense,
 ) error {
-	// TODO: Check if user creates expense for category in his category list
-	err := s.Repo.Create(e)
+	err := s.Repo.Create(ctx, e)
 
 	if err != nil {
 		if dberrors.IsForeignKeyViolation(err) {
@@ -24,4 +25,14 @@ func (s *ExpenseService) Create(
 	}
 
 	return nil
+}
+
+func (s *ExpenseService) GetByUserID(ctx context.Context, userID int) ([]*repository.Expense, error) {
+	expenses, err := s.Repo.GetByUserID(ctx, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
 }

@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"github/idbeholdv18/expense-tracker/internal/repository"
 )
@@ -13,7 +14,7 @@ func NewExpensesRepository(db *sql.DB) *PostgresExpensesRepository {
 	return &PostgresExpensesRepository{db: db}
 }
 
-func (r *PostgresExpensesRepository) Create(e *repository.Expense) error {
+func (r *PostgresExpensesRepository) Create(ctx context.Context, e *repository.Expense) error {
 	query := `
 		INSERT INTO expenses.expenses 
 		(user_id, amount, expense_type_id, currency, description, expense_date)
@@ -21,7 +22,8 @@ func (r *PostgresExpensesRepository) Create(e *repository.Expense) error {
 		RETURNING id, created_at, updated_at
 	`
 
-	return r.db.QueryRow(
+	return r.db.QueryRowContext(
+		ctx,
 		query,
 		e.UserID,
 		e.Amount,
@@ -101,7 +103,7 @@ func (r *PostgresExpensesRepository) GetByID(userID int, expenseID int) (*reposi
 	return expense, nil
 }
 
-func (r *PostgresExpensesRepository) GetByUserID(userID int) ([]*repository.Expense, error) {
+func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int) ([]*repository.Expense, error) {
 	query := `
 		SELECT id, user_id, amount, expense_type_id, currency, description, expense_date, created_at, updated_at
 		FROM expenses.expenses 
@@ -109,7 +111,8 @@ func (r *PostgresExpensesRepository) GetByUserID(userID int) ([]*repository.Expe
 		ORDER BY expense_date DESC
 	`
 
-	rows, err := r.db.Query(
+	rows, err := r.db.QueryContext(
+		ctx,
 		query,
 		userID,
 	)

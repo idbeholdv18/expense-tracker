@@ -1,6 +1,9 @@
 package repository
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Expense struct {
 	ID            int
@@ -15,9 +18,9 @@ type Expense struct {
 }
 
 type ExpenseRepository interface {
-	Create(expense *Expense) error
+	Create(ctx context.Context, expense *Expense) error
 	DeleteByID(userID int, expenseID int) error
 	Update(expense *Expense) error
 	GetByID(userID int, expenseID int) (*Expense, error)
-	GetByUserID(userId int) ([]*Expense, error)
+	GetByUserID(ctx context.Context, userId int) ([]*Expense, error)
 }
