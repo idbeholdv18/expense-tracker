@@ -44,7 +44,7 @@ func (r *PostgresExpenseTypeRepository) DeleteByID(ctx context.Context, userID i
 	return nil
 }
 
-func (r *PostgresExpenseTypeRepository) GetById(ctx context.Context, userID int, expenseTypeID int) (*repository.ExpenseType, error) {
+func (r *PostgresExpenseTypeRepository) GetByID(ctx context.Context, userID int, expenseTypeID int) (*repository.ExpenseType, error) {
 	query := `
 		SELECT id, user_id, name, created_at
 		FROM expenses.expense_types
@@ -66,4 +66,36 @@ func (r *PostgresExpenseTypeRepository) GetById(ctx context.Context, userID int,
 	}
 
 	return expenseType, nil
+}
+
+func (r *PostgresExpenseTypeRepository) GetByUserID(ctx context.Context, userID int) ([]*repository.ExpenseType, error) {
+	query := `
+		SELECT id, user_id, name, created_at
+		FROM expenses.expense_types
+		WHERE user_id=$1
+		ORDER BY created_at DESC
+	`
+	rows, err := r.db.QueryContext(ctx, query, userID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenseTypes []*repository.ExpenseType
+
+	for rows.Next() {
+		expenseType := &repository.ExpenseType{}
+		err := rows.Scan(&expenseType.ID, &expenseType.UserID, &expenseType.Name, &expenseType.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		expenseTypes = append(expenseTypes, expenseType)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return expenseTypes, nil
 }

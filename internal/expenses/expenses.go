@@ -1,6 +1,8 @@
 package expenses
 
 import (
+	"github/idbeholdv18/expense-tracker/internal/dberrors"
+	"github/idbeholdv18/expense-tracker/internal/domain"
 	"github/idbeholdv18/expense-tracker/internal/repository"
 )
 
@@ -15,6 +17,9 @@ func (s *ExpenseService) Create(
 	err := s.Repo.Create(e)
 
 	if err != nil {
+		if dberrors.IsForeignKeyViolation(err) {
+			return domain.ErrInvalidExpenseType
+		}
 		return err
 	}
 

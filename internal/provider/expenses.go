@@ -2,6 +2,8 @@ package provider
 
 import (
 	"encoding/json"
+	"errors"
+	"github/idbeholdv18/expense-tracker/internal/domain"
 	"github/idbeholdv18/expense-tracker/internal/expenses"
 	"github/idbeholdv18/expense-tracker/internal/repository"
 	"net/http"
@@ -50,7 +52,12 @@ func (h *ExpenseHandler) HandleCreate() http.HandlerFunc {
 		}
 
 		if err := h.Service.Create(expense); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			switch {
+			case errors.Is(err, domain.ErrInvalidExpenseType):
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			default:
+				http.Error(w, "internal server error", http.StatusInternalServerError)
+			}
 			return
 		}
 
