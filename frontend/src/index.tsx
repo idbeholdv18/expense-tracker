@@ -1,8 +1,13 @@
 import { createRoot } from "react-dom/client";
-import React from "react";
 import "./app/ui/global.css";
+import { App } from "@/app/ui/App";
 
 document.body.innerHTML = '<div id="app"></div>';
 
-const root = createRoot(document.getElementById("app"));
-root.render(<h1 className='bg-red-200'>Hello, world</h1>);
+const rootNode = document.getElementById("app");
+if (!rootNode) {
+  throw new Error('node with id="app" doesn\'t exist');
+}
+
+const root = createRoot(rootNode);
+root.render(<App />);

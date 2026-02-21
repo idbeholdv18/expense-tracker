@@ -11,6 +11,7 @@ import (
 	"github/idbeholdv18/expense-tracker/internal/repository/postgres"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -58,5 +59,5 @@ func main() {
 	http.Handle("/api/v1/register", authHandler.HandleRegister())
 	http.Handle("/api/v1/expenses", jwtMiddleware(expensesHandler.HandleExpense()))
 
-	http.ListenAndServe(fmt.Sprintf("localhost:%d", *port), nil)
+	log.Fatal(http.ListenAndServeTLS(":"+strconv.Itoa(*port), "cert/cert.pem", "cert/key.pem", nil))
 }
