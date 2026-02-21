@@ -1,4 +1,5 @@
-import { Configuration } from "webpack";
+/// <reference path="node_modules/webpack-dev-server/types/lib/Server.d.ts"/>
+import { type Configuration } from "webpack";
 import path, { dirname } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { fileURLToPath } from "url";
@@ -33,5 +34,17 @@ export default (): Configuration => {
         template: path.resolve(__dirname, "public", "index.html"),
       }),
     ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+      },
+      extensions: [".tsx", ".ts", ".js", ".jsx"],
+    },
+    devServer: {
+      port: 3000,
+      hot: true,
+      open: true,
+      historyApiFallback: true,
+    },
   };
 };
