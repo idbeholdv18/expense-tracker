@@ -1,18 +1,18 @@
-import { FC } from "react";
-import { useFormStatus } from "react-dom";
+import { FC, memo } from "react";
 
-export interface SubmitButtonProps {}
+export interface SubmitButtonProps {
+  isSubmitting: boolean;
+  isReady: boolean;
+}
 
-export const SubmitButton: FC<SubmitButtonProps> = () => {
-  const { pending } = useFormStatus();
-
+export const SubmitButton = memo((props: SubmitButtonProps) => {
   return (
     <button
       type='submit'
-      disabled={pending}
+      disabled={props.isSubmitting || !props.isReady}
       className='h-9 px-4 mt-4 bg-neutral-900 text-white rounded-md'
     >
-      {pending ? "Submitting..." : "Login"}
+      {props.isSubmitting ? "Submitting..." : "Login"}
     </button>
   );
-};
+});
