@@ -3,6 +3,7 @@ import { type Configuration } from "webpack";
 import path, { dirname } from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { fileURLToPath } from "url";
+import { readFileSync } from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,6 +43,14 @@ export default (): Configuration => {
     },
     devServer: {
       port: 3000,
+      server: {
+        type: "https",
+        options: {
+          key: readFileSync(path.resolve(__dirname, "../cert/key.pem")),
+          cert: readFileSync(path.resolve(__dirname, "../cert/cert.pem")),
+
+        },
+      },
       hot: true,
       open: true,
       historyApiFallback: true,

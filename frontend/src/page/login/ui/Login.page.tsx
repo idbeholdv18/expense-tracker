@@ -12,8 +12,9 @@ export const LoginPage: FC<LoginPageProps> = () => {
     const password = formData.get("password");
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/login", {
+      const response = await fetch("https://localhost:8080/api/v1/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -42,6 +43,7 @@ export const LoginPage: FC<LoginPageProps> = () => {
         <label htmlFor={loginId}>
           login
           <input
+            defaultValue={"testuser"}
             required
             name='login'
             type='text'
@@ -56,6 +58,7 @@ export const LoginPage: FC<LoginPageProps> = () => {
           password
           <input
             required
+            defaultValue={"123456"}
             name='password'
             type='password'
             id={passwordId}
