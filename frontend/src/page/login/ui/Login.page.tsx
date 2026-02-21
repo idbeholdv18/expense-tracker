@@ -5,10 +5,12 @@ import { useFormStatus } from "react-dom";
 
 export interface LoginPageProps {}
 
-export const LoginPage: FC<LoginPageProps> = () => {
+const LoginPage: FC<LoginPageProps> = () => {
   return (
     <div className={clsx("px-4 pt-8")}>
       <LoginForm />
     </div>
   );
 };
+
+export default LoginPage;

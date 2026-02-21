@@ -1,6 +1,7 @@
+import { router } from "@/shared/router/router";
 import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router";
 import "./app/ui/global.css";
-import { App } from "@/app/ui/App";
 
 document.body.innerHTML = '<div id="app"></div>';
 
@@ -10,4 +11,4 @@ if (!rootNode) {
 }
 
 const root = createRoot(rootNode);
-root.render(<App />);
+root.render(<RouterProvider router={router} />);
