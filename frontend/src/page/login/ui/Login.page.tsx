@@ -1,15 +1,17 @@
 import { LoginForm } from "@/feature/auth/login";
-import clsx from "clsx";
-import { ChangeEvent, FC, useId, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { Container } from "@/shared/ui/container";
+import { Section } from "@/shared/ui/section";
+import { FC } from "react";
 
 export interface LoginPageProps {}
 
 const LoginPage: FC<LoginPageProps> = () => {
   return (
-    <div className={clsx("px-4 pt-8")}>
-      <LoginForm />
-    </div>
+    <Section className='bg-login-pattern'>
+      <Container className='min-h-screen flex flex-col'>
+        <LoginForm />
+      </Container>
+    </Section>
   );
 };
 
