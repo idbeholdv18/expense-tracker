@@ -1,9 +1,9 @@
-package postgres
+package expenses
 
 import (
 	"context"
 	"database/sql"
-	"github/idbeholdv18/expense-tracker/internal/repository"
+	"github/idbeholdv18/expense-tracker/internal/domain"
 )
 
 type PostgresExpensesRepository struct {
@@ -14,7 +14,7 @@ func NewExpensesRepository(db *sql.DB) *PostgresExpensesRepository {
 	return &PostgresExpensesRepository{db: db}
 }
 
-func (r *PostgresExpensesRepository) Create(ctx context.Context, e *repository.Expense) error {
+func (r *PostgresExpensesRepository) Create(ctx context.Context, e *Expense) error {
 	query := `
 		INSERT INTO expenses.expenses 
 		(user_id, amount, expense_type_id, currency, description, expense_date)
@@ -34,24 +34,40 @@ func (r *PostgresExpensesRepository) Create(ctx context.Context, e *repository.E
 	).Scan(&e.ID, &e.CreatedAt, &e.UpdatedAt)
 }
 
-func (r *PostgresExpensesRepository) DeleteByID(userID int, expenseID int) error {
-	_, err := r.db.Exec(`DELETE FROM expenses.expenses WHERE id=$1 AND user_id=$2;`, expenseID, userID)
-	return err
+func (r *PostgresExpensesRepository) DeleteByID(ctx context.Context, userID int, expenseID int) error {
+	res, err := r.db.Exec(`DELETE FROM expenses.expenses WHERE id=$1 AND user_id=$2;`, expenseID, userID)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
 }
 
-func (r *PostgresExpensesRepository) Update(e *repository.Expense) error {
+func (r *PostgresExpensesRepository) Update(ctx context.Context, userID int, e *Expense) error {
 	query := `
 		UPDATE expenses.expenses
 		SET amount=$1,
 			expense_type_id=$2,
 			currency=$3,
 			description=$4,
-			expense_date=$5
-			udated_at=NOW()
-		WHERE id=$6
+			expense_date=$5,
+			updated_at=NOW()
+		WHERE id=$6 AND user_id=$7
 	`
 
-	_, err := r.db.Exec(
+	res, err := r.db.ExecContext(
+		ctx,
 		query,
 		e.Amount,
 		e.ExpenseTypeID,
@@ -59,25 +75,36 @@ func (r *PostgresExpensesRepository) Update(e *repository.Expense) error {
 		e.Description,
 		e.ExpenseDate,
 		e.ID,
+		e.UserID,
 	)
 
 	if err != nil {
 		return err
 	}
 
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return domain.ErrNotFound
+	}
+
 	return nil
 }
 
-func (r *PostgresExpensesRepository) GetByID(userID int, expenseID int) (*repository.Expense, error) {
+func (r *PostgresExpensesRepository) GetByID(ctx context.Context, userID int, expenseID int) (*Expense, error) {
 	query := `
 		SELECT id, user_id, amount, expense_type_id, currency, description, expense_date, created_at, updated_at
 		FROM expenses.expenses 
 		WHERE id=$1 AND user_id=$2
 	`
 
-	expense := &repository.Expense{}
+	expense := &Expense{}
 
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(
+		ctx,
 		query,
 		expenseID,
 		userID,
@@ -94,7 +121,7 @@ func (r *PostgresExpensesRepository) GetByID(userID int, expenseID int) (*reposi
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, domain.ErrNotFound
 	}
 
 	if err != nil {
@@ -103,7 +130,7 @@ func (r *PostgresExpensesRepository) GetByID(userID int, expenseID int) (*reposi
 	return expense, nil
 }
 
-func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int) ([]*repository.Expense, error) {
+func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int) ([]*Expense, error) {
 	query := `
 		SELECT id, user_id, amount, expense_type_id, currency, description, expense_date, created_at, updated_at
 		FROM expenses.expenses 
@@ -122,10 +149,10 @@ func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int
 	}
 	defer rows.Close()
 
-	expenses := []*repository.Expense{}
+	var expenses []*Expense
 
 	for rows.Next() {
-		expense := &repository.Expense{}
+		expense := &Expense{}
 
 		if err := rows.Scan(
 			&expense.ID,

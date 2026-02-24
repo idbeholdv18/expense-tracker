@@ -1,24 +1,39 @@
-package postgres
+package expensetypes
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-	"github/idbeholdv18/expense-tracker/internal/repository"
+	"github/idbeholdv18/expense-tracker/internal/dberrors"
+	"github/idbeholdv18/expense-tracker/internal/domain"
 )
 
 type PostgresExpenseTypeRepository struct {
 	db *sql.DB
 }
 
-func (r *PostgresExpenseTypeRepository) Create(ctx context.Context, t *repository.ExpenseType) error {
+func NewExepenseTypesRepository(db *sql.DB) *PostgresExpenseTypeRepository {
+	return &PostgresExpenseTypeRepository{db: db}
+}
+
+func (r *PostgresExpenseTypeRepository) Create(ctx context.Context, userID int, t *ExpenseType) error {
 	query := `
 		INSERT INTO expenses.expense_types (user_id, name)
 		VALUES ($1, $2)
 		RETURNING id, created_at;
 	`
 
-	return r.db.QueryRowContext(ctx, query, t.UserID, t.Name).Scan(&t.ID, &t.CreatedAt)
+	t.UserID = userID
+
+	err := r.db.QueryRowContext(ctx, query, t.UserID, t.Name).Scan(&t.ID, &t.CreatedAt)
+
+	if err != nil {
+		if dberrors.IsUniqueViolation(err) {
+			return ErrExpenseTypeAlreadyExists
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *PostgresExpenseTypeRepository) DeleteByID(ctx context.Context, userID int, expenseTypeID int) error {
@@ -38,27 +53,27 @@ func (r *PostgresExpenseTypeRepository) DeleteByID(ctx context.Context, userID i
 	}
 
 	if rows == 0 {
-		return errors.New("expense type not found or not owned by user")
+		return domain.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *PostgresExpenseTypeRepository) GetByID(ctx context.Context, userID int, expenseTypeID int) (*repository.ExpenseType, error) {
+func (r *PostgresExpenseTypeRepository) GetByID(ctx context.Context, userID int, expenseTypeID int) (*ExpenseType, error) {
 	query := `
 		SELECT id, user_id, name, created_at
 		FROM expenses.expense_types
 		WHERE user_id=$1 AND id=$2;
 	`
 
-	expenseType := &repository.ExpenseType{}
+	expenseType := &ExpenseType{}
 
 	err := r.db.
 		QueryRowContext(ctx, query, userID, expenseTypeID).
 		Scan(&expenseType.ID, &expenseType.UserID, &expenseType.Name, &expenseType.CreatedAt)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		return nil, domain.ErrNotFound
 	}
 
 	if err != nil {
@@ -68,7 +83,7 @@ func (r *PostgresExpenseTypeRepository) GetByID(ctx context.Context, userID int,
 	return expenseType, nil
 }
 
-func (r *PostgresExpenseTypeRepository) GetByUserID(ctx context.Context, userID int) ([]*repository.ExpenseType, error) {
+func (r *PostgresExpenseTypeRepository) GetByUserID(ctx context.Context, userID int) ([]*ExpenseType, error) {
 	query := `
 		SELECT id, user_id, name, created_at
 		FROM expenses.expense_types
@@ -82,10 +97,10 @@ func (r *PostgresExpenseTypeRepository) GetByUserID(ctx context.Context, userID 
 	}
 	defer rows.Close()
 
-	var expenseTypes []*repository.ExpenseType
+	var expenseTypes []*ExpenseType
 
 	for rows.Next() {
-		expenseType := &repository.ExpenseType{}
+		expenseType := &ExpenseType{}
 		err := rows.Scan(&expenseType.ID, &expenseType.UserID, &expenseType.Name, &expenseType.CreatedAt)
 		if err != nil {
 			return nil, err
