@@ -64,7 +64,7 @@ func main() {
 					Amount:        float64(rand.Intn(100)),
 					ExpenseTypeID: et.ID,
 					Currency:      "RUB",
-					Description:   fmt.Sprintf("expense %s", j),
+					Description:   fmt.Sprintf("expense %d", j),
 					ExpenseDate:   time.Now(),
 				}
 				_, err := services.Expenses.Create(

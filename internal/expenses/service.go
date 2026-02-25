@@ -4,6 +4,7 @@ import (
 	"context"
 	"github/idbeholdv18/expense-tracker/internal/dberrors"
 	"github/idbeholdv18/expense-tracker/internal/domain"
+	"math"
 )
 
 type ExpenseService struct {
@@ -17,6 +18,7 @@ func (s *ExpenseService) Create(
 ) (*Expense, error) {
 	e := &Expense{
 		Amount:        createDTO.Amount,
+		AmountInt:     int64(math.Round(createDTO.Amount * 100)),
 		ExpenseTypeID: createDTO.ExpenseTypeID,
 		Currency:      createDTO.Currency,
 		Description:   createDTO.Description,

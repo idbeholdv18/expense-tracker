@@ -5,6 +5,7 @@ import (
 	"github/idbeholdv18/expense-tracker/internal/domain"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
+	"math"
 	"net/http"
 	"time"
 )
@@ -133,6 +134,7 @@ func (h *ExpenseHandler) handleUpdate(w http.ResponseWriter, r *http.Request, us
 		ID:            req.ID,
 		UserID:        userID,
 		Amount:        req.Amount,
+		AmountInt:     int64(math.Round(req.Amount * 100)),
 		ExpenseTypeID: req.ExpenseTypeID,
 		Currency:      req.Currency,
 		Description:   req.Description,
