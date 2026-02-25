@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func registerRoutes(middlewares *Middlewares, handlers *Handlers) {
+func RegisterRoutes(middlewares *Middlewares, handlers *Handlers) {
 
 	authHandler := middleware.Apply(
 		handlers.Auth.HandleLogin(),

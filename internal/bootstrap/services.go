@@ -16,7 +16,7 @@ type Services struct {
 	Token        *token.TokenService
 }
 
-func registerServices(config *config.Config, repositories *Repositories) *Services {
+func RegisterServices(config *config.Config, repositories *Repositories) *Services {
 
 	authService := &auth.AuthService{
 		Repo: repositories.User,

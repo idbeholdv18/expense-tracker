@@ -13,7 +13,7 @@ type Repositories struct {
 	ExpenseTypes expensetypes.ExpenseTypeRepository
 }
 
-func registerRepositories(db *sql.DB) *Repositories {
+func RegisterRepositories(db *sql.DB) *Repositories {
 	userRepo := user.NewUserRepository(db)
 	expensesRepo := expenses.NewExpensesRepository(db)
 	expenseTypesRepo := expensetypes.NewExepenseTypesRepository(db)

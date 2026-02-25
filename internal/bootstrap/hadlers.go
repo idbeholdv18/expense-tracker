@@ -12,7 +12,7 @@ type Handlers struct {
 	ExpenseTypes *expensetypes.ExpenseTypesHandler
 }
 
-func registerHandlers(services *Services) *Handlers {
+func RegisterHandlers(services *Services) *Handlers {
 	authHandler := &auth.AuthHandler{
 		Auth:  services.Auth,
 		Token: services.Token,

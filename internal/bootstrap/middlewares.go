@@ -11,7 +11,7 @@ type Middlewares struct {
 	Errors middleware.Middleware
 }
 
-func registerMiddlewares(config *config.Config, services *Services) *Middlewares {
+func RegisterMiddlewares(config *config.Config, services *Services) *Middlewares {
 	corsMiddleware := middleware.CorsMiddleware(&middleware.CorsConfig{
 		AllowedOrigin: config.CORSOrigin,
 	})

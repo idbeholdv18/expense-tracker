@@ -11,7 +11,7 @@ import (
 	"github/idbeholdv18/expense-tracker/internal/user"
 )
 
-func registerErrors() {
+func RegisterErrors() {
 	domain.RegisterErrors(transport_errors.Register)
 	auth.RegisterErrors(transport_errors.Register)
 	token.RegisterErrors(transport_errors.Register)

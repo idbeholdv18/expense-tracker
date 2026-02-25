@@ -18,15 +18,15 @@ func New(cfg *config.Config) *App {
 func (a *App) Run() {
 	db := database.New(a.config.DatabaseURL)
 
-	repositories := registerRepositories(db)
+	repositories := RegisterRepositories(db)
 
-	services := registerServices(a.config, repositories)
+	services := RegisterServices(a.config, repositories)
 
-	handlers := registerHandlers(services)
-	middlewares := registerMiddlewares(a.config, services)
+	handlers := RegisterHandlers(services)
+	middlewares := RegisterMiddlewares(a.config, services)
 
-	registerErrors()
-	registerRoutes(middlewares, handlers)
+	RegisterErrors()
+	RegisterRoutes(middlewares, handlers)
 
 	log.Fatal(http.ListenAndServeTLS(":"+a.config.Port, "cert/cert.pem", "cert/key.pem", nil))
 }

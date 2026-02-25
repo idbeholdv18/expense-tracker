@@ -2,46 +2,83 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"github/idbeholdv18/expense-tracker/internal/auth"
-	"github/idbeholdv18/expense-tracker/internal/security/password"
-	"github/idbeholdv18/expense-tracker/internal/user"
+	"github/idbeholdv18/expense-tracker/internal/bootstrap"
+	"github/idbeholdv18/expense-tracker/internal/config"
+	"github/idbeholdv18/expense-tracker/internal/database"
+	"github/idbeholdv18/expense-tracker/internal/expenses"
 	"log"
+	"math/rand"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
-	db, err := sql.Open("pgx", "postgres://idbeholdv:idbeholdv@localhost:5433/expense_tracker?sslmode=disable")
+	cfg := config.Load()
+	db := database.New(cfg.DatabaseURL)
 
-	db.Exec("TRUNCATE TABLE users.users CASCADE")
-	db.Exec("TRUNCATE TABLE expenses.expenses CASCADE")
-	db.Exec("TRUNCATE TABLE expenses.expense_types CASCADE")
-
-	if err != nil {
-		log.Fatal("database connection err")
+	if _, err := db.Exec("TRUNCATE TABLE users.users CASCADE"); err != nil {
+		log.Fatal("Seed err:", err)
+	}
+	if _, err := db.Exec("TRUNCATE TABLE expenses.expenses CASCADE"); err != nil {
+		log.Fatal("Seed err:", err)
+	}
+	if _, err := db.Exec("TRUNCATE TABLE expenses.expense_types CASCADE"); err != nil {
+		log.Fatal("Seed err:", err)
 	}
 
-	userRepo := user.NewUserRepository(db)
+	repositories := bootstrap.RegisterRepositories(db)
 
-	hasher := &password.BcryptHasher{
-		Cost: bcrypt.DefaultCost,
-	}
+	services := bootstrap.RegisterServices(cfg, repositories)
 
-	authService := &auth.AuthService{
-		Repo:   userRepo,
-		Hasher: hasher,
-	}
+	ctx := context.Background()
+
+	rand.Seed(time.Now().UnixNano())
 
 	for i := range 10 {
-		_, err := authService.Register(
-			context.Background(),
+		user, err := services.Auth.Register(
+			ctx,
 			fmt.Sprintf("user%d@test.com", i),
 			fmt.Sprintf("user%d", i),
 			"password123",
 		)
+
+		if err != nil {
+			log.Fatal("Seed err during user creating:", err)
+		}
+
+		for k := range 4 {
+			et, err := services.ExpenseTypes.Create(
+				ctx,
+				user.ID,
+				fmt.Sprintf("expense type %d", k),
+			)
+
+			if err != nil {
+				log.Fatal("Seed err during exepnse type creating:", err)
+			}
+
+			for j := range rand.Intn(5) {
+				candidate := &expenses.CreateExpenseInput{
+					Amount:        float64(rand.Intn(100)),
+					ExpenseTypeID: et.ID,
+					Currency:      "RUB",
+					Description:   fmt.Sprintf("expense %s", j),
+					ExpenseDate:   time.Now(),
+				}
+				_, err := services.Expenses.Create(
+					ctx,
+					user.ID,
+					candidate,
+				)
+
+				if err != nil {
+					log.Fatal("Seed err during exepnse creating:", err)
+				}
+
+			}
+		}
 
 		if err != nil {
 			log.Fatal(err)
