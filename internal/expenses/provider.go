@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github/idbeholdv18/expense-tracker/internal/domain"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
+	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
 	"net/http"
 	"time"
 )
@@ -14,7 +15,7 @@ type ExpenseHandler struct {
 
 func (h *ExpenseHandler) HandleExpense() httptransport.AppHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		userID, ok := r.Context().Value("user_id").(int)
+		userID, ok := middleware.GetUserID(r.Context())
 		if !ok {
 			return domain.ErrUnauthorized
 		}
