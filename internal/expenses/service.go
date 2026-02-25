@@ -13,19 +13,27 @@ type ExpenseService struct {
 func (s *ExpenseService) Create(
 	ctx context.Context,
 	userID int,
-	e *Expense,
-) error {
-	e.UserID = userID
+	createDTO *CreateExpenseInput,
+) (*Expense, error) {
+	e := &Expense{
+		Amount:        createDTO.Amount,
+		ExpenseTypeID: createDTO.ExpenseTypeID,
+		Currency:      createDTO.Currency,
+		Description:   createDTO.Description,
+		ExpenseDate:   createDTO.ExpenseDate,
+		UserID:        userID,
+	}
+
 	err := s.Repo.Create(ctx, e)
 
 	if err != nil {
 		if dberrors.IsForeignKeyViolation(err) {
-			return domain.ErrInvalidReference
+			return nil, domain.ErrInvalidReference
 		}
-		return err
+		return nil, err
 	}
 
-	return nil
+	return e, nil
 }
 
 func (s *ExpenseService) GetByUserID(ctx context.Context, userID int) ([]*Expense, error) {

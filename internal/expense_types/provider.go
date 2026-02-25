@@ -47,18 +47,20 @@ func (h *ExpenseTypesHandler) handleCreate(w http.ResponseWriter, r *http.Reques
 		return ErrIncorrectExpenseTypeCreatePayload
 	}
 
-	et := &ExpenseType{
-		UserID: userID,
-		Name:   req.Name,
+	et, err := h.Service.Create(r.Context(), userID, req.Name)
+	if err != nil {
+		return err
 	}
 
-	if err := h.Service.Create(r.Context(), userID, et); err != nil {
-		return err
+	res := &ExpenseTypeCreateResponse{
+		ID:        et.ID,
+		Name:      et.Name,
+		CreatedAt: et.CreatedAt,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	return json.NewEncoder(w).Encode(et)
+	return json.NewEncoder(w).Encode(res)
 }
 
 func (h *ExpenseTypesHandler) handleDelete(w http.ResponseWriter, r *http.Request, userID int) error {

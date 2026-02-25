@@ -52,13 +52,7 @@ func (h *ExpenseHandler) handleGetByUserID(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *ExpenseHandler) handleCreate(w http.ResponseWriter, r *http.Request, userID int) error {
-	var req struct {
-		Amount        float64 `json:"amount"`
-		ExpenseTypeID int     `json:"expense_type_id"`
-		Currency      string  `json:"currency"`
-		Description   string  `json:"description"`
-		ExpenseDate   string  `json:"expense_date"`
-	}
+	var req ExpenseCreateRequestDTO
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -72,7 +66,7 @@ func (h *ExpenseHandler) handleCreate(w http.ResponseWriter, r *http.Request, us
 		return ErrIncorrectDateFormat
 	}
 
-	expense := &Expense{
+	payload := &CreateExpenseInput{
 		Amount:        req.Amount,
 		ExpenseTypeID: req.ExpenseTypeID,
 		Currency:      req.Currency,
@@ -80,13 +74,16 @@ func (h *ExpenseHandler) handleCreate(w http.ResponseWriter, r *http.Request, us
 		ExpenseDate:   expenseDate,
 	}
 
-	if err := h.Service.Create(r.Context(), userID, expense); err != nil {
+	e, err := h.Service.Create(r.Context(), userID, payload)
+	if err != nil {
 		return err
 	}
 
+	res := toCreateResponse(e)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	return json.NewEncoder(w).Encode(expense)
+	return json.NewEncoder(w).Encode(res)
 }
 
 func (h *ExpenseHandler) handleDelete(w http.ResponseWriter, r *http.Request, userID int) error {

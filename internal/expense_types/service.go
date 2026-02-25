@@ -8,8 +8,17 @@ type ExpenseTypesService struct {
 	Repo ExpenseTypeRepository
 }
 
-func (s *ExpenseTypesService) Create(ctx context.Context, userID int, et *ExpenseType) error {
-	return s.Repo.Create(ctx, userID, et)
+func (s *ExpenseTypesService) Create(ctx context.Context, userID int, name string) (*ExpenseType, error) {
+	et := &ExpenseType{
+		UserID: userID,
+		Name:   name,
+	}
+
+	if err := s.Repo.Create(ctx, et); err != nil {
+		return nil, err
+	}
+
+	return et, nil
 }
 
 func (s *ExpenseTypesService) Delete(ctx context.Context, userID int, expenseTypeID int) error {

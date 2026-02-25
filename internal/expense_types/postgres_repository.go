@@ -16,16 +16,14 @@ func NewExepenseTypesRepository(db *sql.DB) *PostgresExpenseTypeRepository {
 	return &PostgresExpenseTypeRepository{db: db}
 }
 
-func (r *PostgresExpenseTypeRepository) Create(ctx context.Context, userID int, t *ExpenseType) error {
+func (r *PostgresExpenseTypeRepository) Create(ctx context.Context, et *ExpenseType) (error) {
 	query := `
 		INSERT INTO expenses.expense_types (user_id, name)
 		VALUES ($1, $2)
 		RETURNING id, created_at;
 	`
 
-	t.UserID = userID
-
-	err := r.db.QueryRowContext(ctx, query, t.UserID, t.Name).Scan(&t.ID, &t.CreatedAt)
+	err := r.db.QueryRowContext(ctx, query, et.UserID, et.Name).Scan(&et.ID, &et.CreatedAt)
 
 	if err != nil {
 		if dberrors.IsUniqueViolation(err) {

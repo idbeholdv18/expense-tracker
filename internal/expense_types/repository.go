@@ -15,6 +15,6 @@ type ExpenseType struct {
 type ExpenseTypeRepository interface {
 	GetByID(ctx context.Context, userID int, id int) (*ExpenseType, error)
 	GetByUserID(ctx context.Context, userID int) ([]*ExpenseType, error)
-	Create(ctx context.Context, userID int, t *ExpenseType) error
+	Create(ctx context.Context, expenseType *ExpenseType) error
 	DeleteByID(ctx context.Context, userID int, id int) error
 }
