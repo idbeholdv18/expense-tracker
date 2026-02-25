@@ -61,7 +61,7 @@ func main() {
 
 			for j := range rand.Intn(5) {
 				candidate := &expenses.CreateExpenseInput{
-					Amount:        float64(rand.Intn(100)),
+					Amount:        int64(rand.Intn(10000)),
 					ExpenseTypeID: et.ID,
 					Currency:      "RUB",
 					Description:   fmt.Sprintf("expense %d", j),
