@@ -8,8 +8,7 @@ import (
 type Expense struct {
 	ID            int
 	UserID        int
-	Amount        float64
-	AmountInt     int64
+	Amount        int64
 	ExpenseTypeID int
 	Currency      string
 	Description   string
@@ -24,8 +23,4 @@ type ExpenseRepository interface {
 	Update(ctx context.Context, userID int, expense *Expense) error
 	GetByID(ctx context.Context, userID int, expenseID int) (*Expense, error)
 	GetByUserID(ctx context.Context, userId int) ([]*Expense, error)
-}
-
-func (e *Expense) AmountFloat() float64 {
-	return float64(e.AmountInt) / 100
 }

@@ -3,16 +3,16 @@ package expenses
 import "time"
 
 type ExpenseCreateRequestDTO struct {
-	Amount        float64 `json:"amount"`
-	ExpenseTypeID int     `json:"expense_type_id"`
-	Currency      string  `json:"currency"`
-	Description   string  `json:"description"`
-	ExpenseDate   string  `json:"expense_date"`
+	Amount        int64  `json:"amount"`
+	ExpenseTypeID int    `json:"expense_type_id"`
+	Currency      string `json:"currency"`
+	Description   string `json:"description"`
+	ExpenseDate   string `json:"expense_date"`
 }
 
 type ExpenseCreateResponseDTO struct {
 	ID            int       `json:"id"`
-	Amount        float64   `json:"amount"`
+	Amount        int64     `json:"amount"`
 	ExpenseTypeID int       `json:"expense_type_id"`
 	Currency      string    `json:"currency"`
 	Description   string    `json:"description"`
@@ -22,7 +22,7 @@ type ExpenseCreateResponseDTO struct {
 }
 
 type CreateExpenseInput struct {
-	Amount        float64
+	Amount        int64
 	ExpenseTypeID int
 	Currency      string
 	Description   string

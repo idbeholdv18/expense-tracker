@@ -5,7 +5,6 @@ import (
 	"github/idbeholdv18/expense-tracker/internal/domain"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
-	"math"
 	"net/http"
 	"time"
 )
@@ -110,12 +109,12 @@ func (h *ExpenseHandler) handleDelete(w http.ResponseWriter, r *http.Request, us
 
 func (h *ExpenseHandler) handleUpdate(w http.ResponseWriter, r *http.Request, userID int) error {
 	var req struct {
-		ID            int     `json:"id"`
-		Amount        float64 `json:"amount"`
-		ExpenseTypeID int     `json:"expense_type_id"`
-		Currency      string  `json:"currency"`
-		Description   string  `json:"description"`
-		ExpenseDate   string  `json:"expense_date"`
+		ID            int    `json:"id"`
+		Amount        int64  `json:"amount"`
+		ExpenseTypeID int    `json:"expense_type_id"`
+		Currency      string `json:"currency"`
+		Description   string `json:"description"`
+		ExpenseDate   string `json:"expense_date"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -134,7 +133,6 @@ func (h *ExpenseHandler) handleUpdate(w http.ResponseWriter, r *http.Request, us
 		ID:            req.ID,
 		UserID:        userID,
 		Amount:        req.Amount,
-		AmountInt:     int64(math.Round(req.Amount * 100)),
 		ExpenseTypeID: req.ExpenseTypeID,
 		Currency:      req.Currency,
 		Description:   req.Description,

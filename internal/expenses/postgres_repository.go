@@ -17,7 +17,7 @@ func NewExpensesRepository(db *sql.DB) *PostgresExpensesRepository {
 func (r *PostgresExpensesRepository) Create(ctx context.Context, e *Expense) error {
 	query := `
 		INSERT INTO expenses.expenses 
-		(user_id, amount, amount_int, expense_type_id, currency, description, expense_date)
+		(user_id, amount_int, expense_type_id, currency, description, expense_date)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
 	`
@@ -26,8 +26,6 @@ func (r *PostgresExpensesRepository) Create(ctx context.Context, e *Expense) err
 		ctx,
 		query,
 		e.UserID,
-		e.Amount,
-		e.AmountInt,
 		e.ExpenseTypeID,
 		e.Currency,
 		e.Description,
@@ -58,21 +56,20 @@ func (r *PostgresExpensesRepository) DeleteByID(ctx context.Context, userID int,
 func (r *PostgresExpensesRepository) Update(ctx context.Context, userID int, e *Expense) error {
 	query := `
 		UPDATE expenses.expenses
-		SET amount=$1,
-			amount_int=$2
-			expense_type_id=$3,
-			currency=$4,
-			description=$5,
-			expense_date=$6,
+		SET
+			amount_int=$1,
+			expense_type_id=$2,
+			currency=$3,
+			description=$4,
+			expense_date=$5,
 			updated_at=NOW()
-		WHERE id=$7 AND user_id=$8
+		WHERE id=$6 AND user_id=$7
 	`
 
 	res, err := r.db.ExecContext(
 		ctx,
 		query,
 		e.Amount,
-		e.AmountInt,
 		e.ExpenseTypeID,
 		e.Currency,
 		e.Description,
@@ -99,7 +96,7 @@ func (r *PostgresExpensesRepository) Update(ctx context.Context, userID int, e *
 
 func (r *PostgresExpensesRepository) GetByID(ctx context.Context, userID int, expenseID int) (*Expense, error) {
 	query := `
-		SELECT id, user_id, amount, amount_int, expense_type_id, currency, description, expense_date, created_at, updated_at
+		SELECT id, user_id, amount_int, expense_type_id, currency, description, expense_date, created_at, updated_at
 		FROM expenses.expenses 
 		WHERE id=$1 AND user_id=$2
 	`
@@ -115,7 +112,6 @@ func (r *PostgresExpensesRepository) GetByID(ctx context.Context, userID int, ex
 		&expense.ID,
 		&expense.UserID,
 		&expense.Amount,
-		&expense.AmountInt,
 		&expense.ExpenseTypeID,
 		&expense.Currency,
 		&expense.Description,
@@ -136,7 +132,7 @@ func (r *PostgresExpensesRepository) GetByID(ctx context.Context, userID int, ex
 
 func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int) ([]*Expense, error) {
 	query := `
-		SELECT id, user_id, amount, amount_int, expense_type_id, currency, description, expense_date, created_at, updated_at
+		SELECT id, user_id, amount_int, expense_type_id, currency, description, expense_date, created_at, updated_at
 		FROM expenses.expenses 
 		WHERE user_id=$1
 		ORDER BY expense_date DESC
@@ -162,7 +158,6 @@ func (r *PostgresExpensesRepository) GetByUserID(ctx context.Context, userID int
 			&expense.ID,
 			&expense.UserID,
 			&expense.Amount,
-			&expense.AmountInt,
 			&expense.ExpenseTypeID,
 			&expense.Currency,
 			&expense.Description,
