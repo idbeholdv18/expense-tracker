@@ -7,20 +7,12 @@ import (
 )
 
 func RegisterRoutes(mux *http.ServeMux, middlewares *Middlewares, handlers *Handlers) {
-
 	authHandler := middleware.Apply(
-		handlers.Auth.HandleLogin(),
+		handlers.Auth.HandleAuth(),
 		middlewares.CORS,
 		middlewares.Errors,
 	)
-	mux.Handle("/api/v1/login", httptransport.AppHandlerToHttpHandler(authHandler))
-
-	registerHandler := middleware.Apply(
-		handlers.Auth.HandleRegister(),
-		middlewares.CORS,
-		middlewares.Errors,
-	)
-	mux.Handle("/api/v1/register", httptransport.AppHandlerToHttpHandler(registerHandler))
+	mux.Handle("/api/v1/auth/", httptransport.AppHandlerToHttpHandler(authHandler))
 
 	expensesHandler := middleware.Apply(
 		handlers.Expenses.HandleExpense(),
