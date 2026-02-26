@@ -49,7 +49,7 @@ func (a *App) Run() {
 	defer stop()
 
 	<-ctx.Done()
-	fmt.Fprint(os.Stdout, "shutting down server...")
+	fmt.Fprint(os.Stdout, "\nshutting down server...\n")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
