@@ -6,21 +6,21 @@ import (
 	"net/http"
 )
 
-func RegisterRoutes(middlewares *Middlewares, handlers *Handlers) {
+func RegisterRoutes(mux *http.ServeMux, middlewares *Middlewares, handlers *Handlers) {
 
 	authHandler := middleware.Apply(
 		handlers.Auth.HandleLogin(),
 		middlewares.CORS,
 		middlewares.Errors,
 	)
-	http.Handle("/api/v1/login", httptransport.AppHandlerToHttpHandler(authHandler))
+	mux.Handle("/api/v1/login", httptransport.AppHandlerToHttpHandler(authHandler))
 
 	registerHandler := middleware.Apply(
 		handlers.Auth.HandleRegister(),
 		middlewares.CORS,
 		middlewares.Errors,
 	)
-	http.Handle("/api/v1/register", httptransport.AppHandlerToHttpHandler(registerHandler))
+	mux.Handle("/api/v1/register", httptransport.AppHandlerToHttpHandler(registerHandler))
 
 	expensesHandler := middleware.Apply(
 		handlers.Expenses.HandleExpense(),
@@ -28,7 +28,7 @@ func RegisterRoutes(middlewares *Middlewares, handlers *Handlers) {
 		middlewares.CORS,
 		middlewares.Errors,
 	)
-	http.Handle("/api/v1/expenses", httptransport.AppHandlerToHttpHandler(expensesHandler))
+	mux.Handle("/api/v1/expenses", httptransport.AppHandlerToHttpHandler(expensesHandler))
 
 	expenseTypesHandler := middleware.Apply(
 		handlers.ExpenseTypes.HandleExpenseTypes(),
@@ -36,5 +36,5 @@ func RegisterRoutes(middlewares *Middlewares, handlers *Handlers) {
 		middlewares.CORS,
 		middlewares.Errors,
 	)
-	http.Handle("/api/v1/expense-types", httptransport.AppHandlerToHttpHandler(expenseTypesHandler))
+	mux.Handle("/api/v1/expense-types", httptransport.AppHandlerToHttpHandler(expenseTypesHandler))
 }

@@ -9,7 +9,10 @@ import (
 )
 
 type Config struct {
+	Host        string
 	Port        string
+	TLSFile     string
+	TLSKey      string
 	DatabaseURL string
 	JWTSecret   string
 	CORSOrigin  string
@@ -24,6 +27,21 @@ func Load() *Config {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = "localhost"
+	}
+
+	tlsFile := os.Getenv("TLS_FILE")
+	if tlsFile == "" {
+		tlsFile = "cert/cert.pem"
+	}
+
+	tlsKey := os.Getenv("TLS_KEY")
+	if tlsKey == "" {
+		host = "cert/key.pem"
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
@@ -49,7 +67,10 @@ func Load() *Config {
 	}
 
 	return &Config{
+		Host:        host,
 		Port:        port,
+		TLSFile:     tlsFile,
+		TLSKey:      tlsKey,
 		DatabaseURL: dbURL,
 		JWTSecret:   jwtSecret,
 		CORSOrigin:  cors,
