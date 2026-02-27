@@ -1,29 +1,25 @@
+import { Container } from "@/shared/ui/container";
 import { Input } from "@/shared/ui/input/Input";
+import { LinkButton } from "@/shared/ui/link-button/LinkButton";
 import { Logo } from "@/shared/ui/logo/Logo";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useEffect, useId } from "react";
+import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { loginApi } from "../model/login.action";
-import { LoginInput, LoginSchema } from "../model/login.schema";
-import { SubmitButton } from "./SubmitButton";
-import { LinkButton } from "@/shared/ui/link-button/LinkButton";
-import { Container } from "@/shared/ui/container";
+import { SubmitButton } from "../../login/ui/SubmitButton";
+import { registerApi } from "../model/register.action";
+import { RegisterInput, RegisterSchema } from "../model/register.schema";
 
-export interface LoginFormProps {}
+export interface RegisterFormProps {}
 
-export const LoginForm: FC<LoginFormProps> = () => {
+export const RegisterForm: FC<RegisterFormProps> = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting, isValid },
     setError,
     clearErrors,
-  } = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema),
-    // defaultValues: {
-    //   login: "testuser",
-    //   password: "123456",
-    // },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(RegisterSchema),
     mode: "all",
   });
 
@@ -35,8 +31,12 @@ export const LoginForm: FC<LoginFormProps> = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await loginApi(data);
-      console.log("Login success");
+      await registerApi({
+        email: data.email,
+        password: data.password,
+        username: data.username,
+      });
+      console.log("Register success");
     } catch (err: any) {
       setError("root", {
         type: "server",
@@ -60,10 +60,21 @@ export const LoginForm: FC<LoginFormProps> = () => {
           <Logo className='bg-fg-accent' />
           <h1 className='font-bold text-2xl text-fg-accent'>MONETA</h1>
         </div>
-        <Input error={errors.login?.message} className='mt-8'>
-          <Input.Label className='text-fg-secondary'>Login*</Input.Label>
+        <Input error={errors.email?.message} className='mt-8'>
+          <Input.Label className='text-fg-secondary'>Email</Input.Label>
           <Input.Field
-            {...register("login", {
+            {...register("email", {
+              onChange: clearRootErrorIfExists,
+            })}
+          />
+          <Input.Error className='text-red-500 text-sm' />
+        </Input>
+
+        {/* TODO: check if username is taken */}
+        <Input error={errors.username?.message}>
+          <Input.Label className='text-fg-secondary'>Username</Input.Label>
+          <Input.Field
+            {...register("username", {
               onChange: clearRootErrorIfExists,
             })}
           />
@@ -71,10 +82,23 @@ export const LoginForm: FC<LoginFormProps> = () => {
         </Input>
 
         <Input error={errors.password?.message}>
-          <Input.Label className='text-fg-secondary'>Password*</Input.Label>
+          <Input.Label className='text-fg-secondary'>Password</Input.Label>
           <Input.Field
             type='password'
             {...register("password", {
+              onChange: clearRootErrorIfExists,
+            })}
+          />
+          <Input.Error className='text-red-500 text-sm' />
+        </Input>
+
+        <Input error={errors.confirmPassword?.message}>
+          <Input.Label className='text-fg-secondary'>
+            Confirm Password
+          </Input.Label>
+          <Input.Field
+            type='password'
+            {...register("confirmPassword", {
               onChange: clearRootErrorIfExists,
             })}
           />
@@ -86,18 +110,15 @@ export const LoginForm: FC<LoginFormProps> = () => {
           isReady={isButtonReady}
           className='w-full bg-fg-accent text-bg-accent font-semibold mt-4'
         >
-          Sign In
+          Sign Up
         </SubmitButton>
         {errors.root && <p className='text-red-500'>{errors.root.message}</p>}
 
         <div className='mt-6 flex flex-col items-center text-fg-secondary gap-2'>
-          <p>Don't have an account?</p>
+          <p>Already have an account?</p>
 
-          <LinkButton
-            to={"/register"}
-            className='font-semibold text-fg-primary'
-          >
-            SIGN UP
+          <LinkButton to={"/login"} className='font-semibold text-fg-primary'>
+            SIGN IN
           </LinkButton>
         </div>
       </Container>

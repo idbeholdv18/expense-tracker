@@ -1,10 +1,11 @@
 import clsx from "clsx";
-import { FC, memo } from "react";
+import { FC, memo, ReactNode } from "react";
 
 export interface SubmitButtonProps {
   isSubmitting: boolean;
   isReady: boolean;
   className?: string;
+  children: ReactNode;
 }
 
 export const SubmitButton = memo((props: SubmitButtonProps) => {
@@ -19,7 +20,7 @@ export const SubmitButton = memo((props: SubmitButtonProps) => {
         props.className,
       )}
     >
-      {props.isSubmitting ? "Submitting..." : "Login"}
+      {props.isSubmitting ? "Submitting..." : props.children}
     </button>
   );
 });

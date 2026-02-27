@@ -7,7 +7,7 @@ export interface LoginPageProps {}
 
 const LoginPage: FC<LoginPageProps> = () => {
   return (
-    <Section className='bg-login-pattern'>
+    <Section className='bg-auth-pattern'>
       <Container className='min-h-screen flex flex-col'>
         <LoginForm />
       </Container>
