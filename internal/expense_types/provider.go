@@ -6,6 +6,8 @@ import (
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type ExpenseTypesHandler struct {
@@ -18,20 +20,36 @@ func (h *ExpenseTypesHandler) HandleExpenseTypes() httptransport.AppHandler {
 		if !ok {
 			return domain.ErrUnauthorized
 		}
+		path := strings.TrimPrefix(r.URL.Path, "/api/v1/expense-types")
 
-		switch r.Method {
-		case http.MethodPost:
-			return h.handleCreate(w, r, userID)
-
-		case http.MethodDelete:
-			return h.handleDelete(w, r, userID)
-
-		case http.MethodGet:
-			return h.handleGetByUserID(w, r, userID)
-
+		switch {
+		case path == "/" || path == "":
+			return h.handleCollection(w, r, userID)
+		case strings.HasPrefix(path, "/"):
+			return h.handleResource(w, r, userID)
 		default:
 			return domain.ErrMethodNotAllowed
 		}
+	}
+}
+
+func (h *ExpenseTypesHandler) handleCollection(w http.ResponseWriter, r *http.Request, userID int) error {
+	switch r.Method {
+	case http.MethodGet:
+		return h.handleGetByUserID(w, r, userID)
+	case http.MethodPost:
+		return h.handleCreate(w, r, userID)
+	default:
+		return domain.ErrMethodNotAllowed
+	}
+}
+
+func (h *ExpenseTypesHandler) handleResource(w http.ResponseWriter, r *http.Request, userID int) error {
+	switch r.Method {
+	case http.MethodDelete:
+		return h.handleDelete(w, r, userID)
+	default:
+		return domain.ErrMethodNotAllowed
 	}
 }
 
@@ -64,17 +82,18 @@ func (h *ExpenseTypesHandler) handleCreate(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *ExpenseTypesHandler) handleDelete(w http.ResponseWriter, r *http.Request, userID int) error {
-	var req struct {
-		ID int `json:"id"`
-	}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
+	idString := strings.TrimPrefix(r.URL.Path, "/api/v1/expense-types/")
 
-	if err := decoder.Decode(&req); err != nil {
-		return ErrIncorrectExpenseTypeCreatePayload
+	if strings.Contains(idString, "/") {
+		return domain.ErrMethodNotAllowed
 	}
 
-	if err := h.Service.Delete(r.Context(), userID, req.ID); err != nil {
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		return domain.ErrBadRequest
+	}
+
+	if err := h.Service.Delete(r.Context(), userID, id); err != nil {
 		return err
 	}
 

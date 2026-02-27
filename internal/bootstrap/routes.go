@@ -29,5 +29,6 @@ func RegisterRoutes(mux *http.ServeMux, middlewares *Middlewares, handlers *Hand
 		middlewares.CORS,
 		middlewares.Errors,
 	)
+	mux.Handle("/api/v1/expense-types/", httptransport.AppHandlerToHttpHandler(expenseTypesHandler))
 	mux.Handle("/api/v1/expense-types", httptransport.AppHandlerToHttpHandler(expenseTypesHandler))
 }
