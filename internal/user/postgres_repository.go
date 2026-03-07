@@ -17,7 +17,7 @@ func NewUserRepository(db *sql.DB) *PostgresUserRepository {
 
 func (r *PostgresUserRepository) FindByEmail(ctx context.Context, email string) (*User, error) {
 	query := `
-		SELECT id, email, username, password
+		SELECT id, email, username, password_hash
 		FROM users.users
 		WHERE email = $1
 	`
@@ -39,7 +39,7 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, email string) 
 
 func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username string) (*User, error) {
 	query := `
-		SELECT id, email, username, password
+		SELECT id, email, username, password_hash
 		FROM users.users
 		WHERE username = $1
 	`
@@ -60,7 +60,7 @@ func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username st
 
 func (r *PostgresUserRepository) FindByLogin(ctx context.Context, login string) (*User, error) {
 	query := `
-		SELECT id, email, username, password
+		SELECT id, email, username, password_hash
 		FROM users.users
 		WHERE email=$1 OR username=$2 LIMIT 1
 	`
@@ -82,7 +82,7 @@ func (r *PostgresUserRepository) FindByLogin(ctx context.Context, login string) 
 
 func (r *PostgresUserRepository) Create(ctx context.Context, user *User) error {
 	query := `
-		INSERT INTO users.users (email, username, password)
+		INSERT INTO users.users (email, username, password_hash)
 		VALUES($1, $2, $3)
 		RETURNING id
 	`
