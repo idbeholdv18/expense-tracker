@@ -10,6 +10,7 @@ func RegisterRoutes(mux *http.ServeMux, middlewares *Middlewares, handlers *Hand
 	authHandler := middleware.Apply(
 		handlers.Auth.HandleAuth(),
 		middlewares.CORS,
+		middlewares.RateLimit,
 		middlewares.Errors,
 	)
 	mux.Handle("/api/v1/auth/", httptransport.AppHandlerToHttpHandler(authHandler))
