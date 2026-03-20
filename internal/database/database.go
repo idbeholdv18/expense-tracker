@@ -2,26 +2,30 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
-	"os"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func New(databaseURL string) *sql.DB {
-	db, err := sql.Open("pgx", databaseURL)
+	var db *sql.DB
+	var err error
+
+	for i := 0; i < 15; i++ {
+		db, err = sql.Open("pgx", databaseURL)
+		if err == nil && db.Ping() == nil {
+			break
+		}
+		log.Println("Waiting for DB to be ready...")
+		time.Sleep(2 * time.Second)
+	}
 
 	if err != nil {
-		log.Fatal("Failed to open database:", err)
-		os.Exit(1)
+		log.Fatal("Could not connect to DB:", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		log.Fatal("Cannot connect to Postgres:", err)
-	}
-
-	fmt.Println("Connected to Postgres")
+	log.Println("DB connected! Starting API...")
 
 	return db
 }

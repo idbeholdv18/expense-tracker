@@ -1,0 +1,6 @@
+.git
+.gitignore
+backlog.md
+Makefile
+frontend
+.env
