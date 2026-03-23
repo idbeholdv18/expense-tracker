@@ -1,0 +1,15 @@
+FROM golang:1.26.1-alpine AS build
+WORKDIR /usr/src/migrate-up
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd/migrate-up ./cmd/migrate-up
+COPY migrations ./cmd/migrate-up/migrations
+COPY internal/config ./internal/config
+COPY internal/database ./internal/database
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /usr/local/bin/migrate-up ./cmd/migrate-up/main.go
+
+FROM alpine:3.20
+WORKDIR /usr/migrate-up/bin
+COPY --from=build /usr/local/bin/migrate-up .
+ENTRYPOINT [ "./migrate-up" ]

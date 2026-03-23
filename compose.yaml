@@ -1,13 +1,16 @@
 services:
   api:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.backend
     image: expense-tracker-api
     ports:
       - 8080:8080
     networks:
       - appnet
     depends_on:
-      - db
+      db: 
+        condition: service_healthy
     env_file:
       - .env
     
@@ -29,10 +32,25 @@ services:
     networks:
       - appnet
 
+
+  migrate:
+    image: expense-tracker-migrate
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    depends_on:
+      db: 
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - appnet
+    profiles:
+      - tools
+
 networks:
   appnet:
 
 volumes:
   appvolume:
   
-
