@@ -25,7 +25,7 @@ func New(databaseURL string) *sql.DB {
 		log.Fatal("Could not connect to DB:", err)
 	}
 
-	log.Println("DB connected! Starting API...")
+	log.Println("DB connected!")
 
 	return db
 }

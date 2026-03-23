@@ -1,24 +1,34 @@
 package middleware
 
 import (
+	"errors"
 	ratelimiter "github/idbeholdv18/expense-tracker/internal/rate_limiter"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"net/http"
 )
 
-type TokenGenerator func(*http.Request) string
+type KeyBuilder func(r *http.Request) (string, error)
 
-func RateLimiterMiddleware(rl ratelimiter.RateLimiter, action string, tokenGenerator TokenGenerator) func(next httptransport.AppHandler) httptransport.AppHandler {
+func RateLimiterMiddleware(rl ratelimiter.RateLimiter, action string, keyBuilder KeyBuilder) func(next httptransport.AppHandler) httptransport.AppHandler {
 	return func(next httptransport.AppHandler) httptransport.AppHandler {
 		return func(w http.ResponseWriter, r *http.Request) error {
-			token := tokenGenerator(r)
+			keyPart, err := keyBuilder(r)
 
-			ok, err := rl.Allow(r.Context(), action, token)
-			if err != nil || !ok {
+			finalKey := action + ":" + keyPart
+
+			ok, err := rl.Allow(r.Context(), finalKey)
+			if err != nil {
 				return err
+			}
+			if !ok {
+				return errors.New(ratelimiter.ErrReachedRateLimit.Error())
 			}
 
 			return next(w, r)
 		}
 	}
+}
+
+func WithRateLimiter() {
+
 }

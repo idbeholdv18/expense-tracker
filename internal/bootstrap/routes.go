@@ -1,19 +1,27 @@
 package bootstrap
 
 import (
+	"github/idbeholdv18/expense-tracker/internal/auth"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
 	"net/http"
 )
 
-func RegisterRoutes(mux *http.ServeMux, middlewares *Middlewares, handlers *Handlers) {
-	authHandler := middleware.Apply(
-		handlers.Auth.HandleAuth(),
+func RegisterRoutes(mux *http.ServeMux, services *Services, middlewares *Middlewares, handlers *Handlers) {
+	loginHandler := middleware.Apply(
+		handlers.Auth.HandleLogin(),
 		middlewares.CORS,
-		middlewares.RateLimit,
+		middleware.RateLimiterMiddleware(services.RateLimiter, "login", auth.LoginRateLimiterKeyBuilder),
 		middlewares.Errors,
 	)
-	mux.Handle("/api/v1/auth/", httptransport.AppHandlerToHttpHandler(authHandler))
+	registerHandler := middleware.Apply(
+		handlers.Auth.HandleRegister(),
+		middlewares.CORS,
+		middleware.RateLimiterMiddleware(services.RateLimiter, "register", auth.RegisterRateLimiterKeyBuilder),
+		middlewares.Errors,
+	)
+	mux.Handle("/api/v1/auth/login", httptransport.AppHandlerToHttpHandler(loginHandler))
+	mux.Handle("/api/v1/auth/register", httptransport.AppHandlerToHttpHandler(registerHandler))
 
 	expensesHandler := middleware.Apply(
 		handlers.Expenses.HandleExpense(),

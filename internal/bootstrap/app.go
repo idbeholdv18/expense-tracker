@@ -33,7 +33,7 @@ func (a *App) Run() {
 	RegisterErrors()
 
 	mux := http.NewServeMux()
-	RegisterRoutes(mux, middlewares, handlers)
+	RegisterRoutes(mux, services, middlewares, handlers)
 
 	server := registerServer(a.config, mux)
 

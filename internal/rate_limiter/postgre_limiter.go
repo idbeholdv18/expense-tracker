@@ -2,7 +2,6 @@ package ratelimiter
 
 import (
 	"context"
-	"log"
 	"time"
 )
 
@@ -20,8 +19,8 @@ type PostgreRateLimiter struct {
 	Window time.Duration
 }
 
-func (p *PostgreRateLimiter) Allow(ctx context.Context, action string, key string) (bool, error) {
-	count, err := p.Repo.Count(ctx, key, action, p.Window)
+func (p *PostgreRateLimiter) Allow(ctx context.Context, key string) (bool, error) {
+	count, err := p.Repo.Count(ctx, key, p.Window)
 
 	if err != nil {
 		return false, err
@@ -32,14 +31,12 @@ func (p *PostgreRateLimiter) Allow(ctx context.Context, action string, key strin
 	}
 
 	err = p.Repo.Create(ctx, &RateLimitLog{
-		Key:    key,
-		Action: action,
+		Key: key,
 	})
 
 	if err != nil {
 		return false, nil
 	}
 
-	log.Printf("allowed: %d", count)
 	return true, nil
 }
