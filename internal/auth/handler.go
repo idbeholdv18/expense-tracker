@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"github/idbeholdv18/expense-tracker/internal/domain"
+	payloadvalidator "github/idbeholdv18/expense-tracker/internal/payload-validator"
 	"github/idbeholdv18/expense-tracker/internal/token"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"net/http"
@@ -20,8 +21,8 @@ func (h *AuthHandler) HandleLogin() httptransport.AppHandler {
 		}
 
 		var req struct {
-			Login    string `json:"login"`
-			Password string `json:"password"`
+			Login    string `json:"login" validate:"required"`
+			Password string `json:"password" validate:"required"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -58,13 +59,27 @@ func (h *AuthHandler) HandleRegister() httptransport.AppHandler {
 		}
 
 		var req struct {
-			Username string `json:"username"`
-			Email    string `json:"email"`
-			Password string `json:"password"`
+			Username string `json:"username" validate:"required"`
+			Email    string `json:"email" validate:"required"`
+			Password string `json:"password" validate:"required"`
 		}
 
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			return domain.ErrBadRequest
+		errors, err := payloadvalidator.ValidateBody(r, &req)
+		if errors != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			return json.NewEncoder(w).Encode(&struct {
+				Status  int
+				Code    string
+				Message any
+			}{
+				Status:  http.StatusBadRequest,
+				Code:    "INVALID_REQUEST_BODY",
+				Message: errors,
+			})
+		}
+		if err != nil {
+			return err
 		}
 
 		user, err := h.Auth.Register(r.Context(), req.Email, req.Username, req.Password)
