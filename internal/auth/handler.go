@@ -40,15 +40,7 @@ func (h *AuthHandler) HandleLogin() httptransport.AppHandler {
 			return err
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:     "access_token",
-			Value:    t,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   3600,
-		})
+		setAuthCookie(w, t, 3600)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -56,7 +48,6 @@ func (h *AuthHandler) HandleLogin() httptransport.AppHandler {
 			"token": t,
 		})
 	}
-
 }
 
 func (h *AuthHandler) HandleRegister() httptransport.AppHandler {
@@ -86,15 +77,7 @@ func (h *AuthHandler) HandleRegister() httptransport.AppHandler {
 			return err
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:     "access_token",
-			Value:    t,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   3600,
-		})
+		setAuthCookie(w, t, 3600)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -102,5 +85,16 @@ func (h *AuthHandler) HandleRegister() httptransport.AppHandler {
 			"token": t,
 		})
 	}
+}
 
+func setAuthCookie(w http.ResponseWriter, token string, maxAge int) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
+	})
 }
