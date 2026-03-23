@@ -48,7 +48,6 @@ export default (): Configuration => {
         options: {
           key: readFileSync(path.resolve(__dirname, "../cert/key.pem")),
           cert: readFileSync(path.resolve(__dirname, "../cert/cert.pem")),
-
         },
       },
       hot: true,
