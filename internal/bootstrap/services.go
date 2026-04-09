@@ -3,12 +3,14 @@ package bootstrap
 import (
 	"github/idbeholdv18/expense-tracker/internal/auth"
 	"github/idbeholdv18/expense-tracker/internal/config"
+	"github/idbeholdv18/expense-tracker/internal/email"
 	expensetypes "github/idbeholdv18/expense-tracker/internal/expense_types"
 	"github/idbeholdv18/expense-tracker/internal/expenses"
 	ratelimiter "github/idbeholdv18/expense-tracker/internal/rate_limiter"
 	"github/idbeholdv18/expense-tracker/internal/security/password"
 	"github/idbeholdv18/expense-tracker/internal/token"
 	"github/idbeholdv18/expense-tracker/internal/validation"
+	"os"
 	"time"
 )
 
@@ -19,6 +21,7 @@ type Services struct {
 	Token        *token.TokenService
 	RateLimiter  *ratelimiter.PostgreRateLimiter
 	Validation   *validation.ValidationService
+	Email        email.EmailService
 }
 
 func RegisterServices(config *config.Config, repositories *Repositories) *Services {
@@ -49,6 +52,7 @@ func RegisterServices(config *config.Config, repositories *Repositories) *Servic
 	}
 
 	validationService := validation.NewValidationService()
+	emailService := email.NewDevEmailService("app@mail.ru", os.Stdout)
 
 	return &Services{
 		Auth:         authService,
@@ -57,5 +61,6 @@ func RegisterServices(config *config.Config, repositories *Repositories) *Servic
 		Token:        tokenService,
 		RateLimiter:  rateLimiterService,
 		Validation:   validationService,
+		Email:        emailService,
 	}
 }

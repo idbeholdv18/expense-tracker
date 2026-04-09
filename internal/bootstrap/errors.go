@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github/idbeholdv18/expense-tracker/internal/auth"
 	"github/idbeholdv18/expense-tracker/internal/domain"
+	"github/idbeholdv18/expense-tracker/internal/email"
 	expensetypes "github/idbeholdv18/expense-tracker/internal/expense_types"
 	"github/idbeholdv18/expense-tracker/internal/expenses"
 	ratelimiter "github/idbeholdv18/expense-tracker/internal/rate_limiter"
@@ -23,4 +24,5 @@ func RegisterErrors() {
 	middleware.RegisterJwtErrors(transport_errors.Register)
 	ratelimiter.RegisterErrors(transport_errors.Register)
 	validation.RegisterErrors(transport_errors.Register)
+	email.RegisterErrors(transport_errors.Register)
 }
