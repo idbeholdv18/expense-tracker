@@ -10,6 +10,7 @@ import (
 	transport_errors "github/idbeholdv18/expense-tracker/internal/transport/http/errors"
 	"github/idbeholdv18/expense-tracker/internal/transport/http/middleware"
 	"github/idbeholdv18/expense-tracker/internal/user"
+	"github/idbeholdv18/expense-tracker/internal/validation"
 )
 
 func RegisterErrors() {
@@ -21,4 +22,5 @@ func RegisterErrors() {
 	expensetypes.RegisterErrors(transport_errors.Register)
 	middleware.RegisterJwtErrors(transport_errors.Register)
 	ratelimiter.RegisterErrors(transport_errors.Register)
+	validation.RegisterErrors(transport_errors.Register)
 }

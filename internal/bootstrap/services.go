@@ -8,6 +8,7 @@ import (
 	ratelimiter "github/idbeholdv18/expense-tracker/internal/rate_limiter"
 	"github/idbeholdv18/expense-tracker/internal/security/password"
 	"github/idbeholdv18/expense-tracker/internal/token"
+	"github/idbeholdv18/expense-tracker/internal/validation"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type Services struct {
 	ExpenseTypes *expensetypes.ExpenseTypesService
 	Token        *token.TokenService
 	RateLimiter  *ratelimiter.PostgreRateLimiter
+	Validation   *validation.ValidationService
 }
 
 func RegisterServices(config *config.Config, repositories *Repositories) *Services {
@@ -46,11 +48,14 @@ func RegisterServices(config *config.Config, repositories *Repositories) *Servic
 		Window: time.Second * 10,
 	}
 
+	validationService := validation.NewValidationService()
+
 	return &Services{
 		Auth:         authService,
 		Expenses:     expensesService,
 		ExpenseTypes: expenseTypesService,
 		Token:        tokenService,
 		RateLimiter:  rateLimiterService,
+		Validation:   validationService,
 	}
 }

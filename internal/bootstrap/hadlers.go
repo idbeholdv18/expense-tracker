@@ -14,8 +14,9 @@ type Handlers struct {
 
 func RegisterHandlers(services *Services) *Handlers {
 	authHandler := &auth.AuthHandler{
-		Auth:  services.Auth,
-		Token: services.Token,
+		Auth:       services.Auth,
+		Token:      services.Token,
+		Validation: services.Validation,
 	}
 
 	expensesHandler := &expenses.ExpenseHandler{

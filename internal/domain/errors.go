@@ -7,11 +7,12 @@ import (
 )
 
 var (
-	ErrMethodNotAllowed = errors.New("method not allowed")
-	ErrBadRequest       = errors.New("bad request")
-	ErrInvalidReference = errors.New("foreign key violation")
-	ErrNotFound         = errors.New("not found")
-	ErrUnauthorized     = errors.New("unauthorized")
+	ErrMethodNotAllowed    = errors.New("method not allowed")
+	ErrBadRequest          = errors.New("bad request")
+	ErrInvalidReference    = errors.New("foreign key violation")
+	ErrNotFound            = errors.New("not found")
+	ErrUnauthorized        = errors.New("unauthorized")
+	ErrInternalServerError = errors.New("internal server error")
 )
 
 func RegisterErrors(register func(domainErr error, handler func(error) *contract.AppError)) {
@@ -49,9 +50,17 @@ func RegisterErrors(register func(domainErr error, handler func(error) *contract
 
 	register(ErrUnauthorized, func(err error) *contract.AppError {
 		return contract.NewAppError(
-			http.StatusNotFound,
+			http.StatusUnauthorized,
 			"UNAUTHORIZED",
 			"unauthorized",
+		)
+	})
+
+	register(ErrInternalServerError, func(err error) *contract.AppError {
+		return contract.NewAppError(
+			http.StatusInternalServerError,
+			"INTERNAL SERVER ERROR",
+			"internal server error",
 		)
 	})
 }
