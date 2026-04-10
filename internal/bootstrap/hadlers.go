@@ -17,6 +17,7 @@ func RegisterHandlers(services *Services) *Handlers {
 		Auth:       services.Auth,
 		Token:      services.Token,
 		Validation: services.Validation,
+		Email:      services.Email,
 	}
 
 	expensesHandler := &expenses.ExpenseHandler{

@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"github/idbeholdv18/expense-tracker/internal/domain"
+	"github/idbeholdv18/expense-tracker/internal/email"
 	"github/idbeholdv18/expense-tracker/internal/token"
 	httptransport "github/idbeholdv18/expense-tracker/internal/transport/http"
 	"github/idbeholdv18/expense-tracker/internal/validation"
@@ -13,6 +14,7 @@ type AuthHandler struct {
 	Auth       *AuthService
 	Token      *token.TokenService
 	Validation *validation.ValidationService
+	Email      email.EmailService
 }
 
 func (h *AuthHandler) HandleLogin() httptransport.AppHandler {
@@ -84,6 +86,14 @@ func (h *AuthHandler) HandleRegister() httptransport.AppHandler {
 
 		t, err := h.Token.CreateToken(user.ID)
 		if err != nil {
+			return err
+		}
+
+		if err := h.Email.Send(r.Context(), email.Email{
+			To:      payload.Email,
+			Subject: "auth",
+			Body:    []byte(t),
+		}); err != nil {
 			return err
 		}
 
